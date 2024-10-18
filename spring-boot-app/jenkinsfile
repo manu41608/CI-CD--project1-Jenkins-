@@ -12,17 +12,13 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/manu41608/jenkins-demo-1.git'
             }
         }
-    }
-    stages {
         stage('Build-Test') {
             steps {
                  // build the project and create a JAR file
                 sh ' cd CI-CD--project1-Jenkins-/spring-boot-app && mvn clean package'
             }
         }
-    }
-    stages {
-        stage('Build and push docker image') {
+     stage('Build and push docker image') {
         environment {
           DOCKER_IMAGE = "manu41608/ci-cd-project1:${BUILD_NUMBER}"
           // DOCKERFILE_LOCATION = "java-maven-sonar-argocd-helm-k8s/spring-boot-app/Dockerfile"
