@@ -10,7 +10,7 @@ pipeline {
         stage('Build-Test') {
             steps {
                  // build the project and create a JAR file
-                sh ' cd CI-CD--project1-Jenkins-/spring-boot-app && mvn clean package'
+                sh ' cd /CI-CD--project1-Jenkins-/spring-boot-app && mvn clean package'
             }
         }
      stage('Build and push docker image') {
@@ -21,7 +21,7 @@ pipeline {
        }
             steps {        
                script {
-                    sh 'cd CI-CD--project1-Jenkins-/spring-boot-app && docker build -t ${DOCKER_IMAGE} .'
+                    sh 'cd /CI-CD--project1-Jenkins-/spring-boot-app && docker build -t ${DOCKER_IMAGE} .'
                     def dockerImage = docker.image("${DOCKER_IMAGE}")
                     docker.withRegistry('https://hub.docker.com/repository/docker/manu41608/ci-cd-project1', "docker-cred") {
                         dockerImage.push()
