@@ -25,8 +25,8 @@ pipeline {
           REGISTRY_CREDENTIALS = credentials('docker-cred')
        }
             steps {        
-               sh 'cd CI-CD--project1-Jenkins-/spring-boot-app && docker build -t ${DOCKER_IMAGE} .'
                script {
+                    sh 'cd CI-CD--project1-Jenkins-/spring-boot-app && docker build -t ${DOCKER_IMAGE} .'
                     def dockerImage = docker.image("${DOCKER_IMAGE}")
                     docker.withRegistry('https://hub.docker.com/repository/docker/manu41608/ci-cd-project1', "docker-cred") {
                         dockerImage.push()
