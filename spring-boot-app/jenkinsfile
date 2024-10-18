@@ -28,7 +28,7 @@ pipeline {
                     //docker.withRegistry('https://hub.docker.com/v2/', "docker-cred") {
                      //   dockerImage.push()
                    //}
-                    sh 'docker push ${dockerImage}'
+                    sh 'docker push ${DOCKER_IMAGE}'
               }
          }
        }
