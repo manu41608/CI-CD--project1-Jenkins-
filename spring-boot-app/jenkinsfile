@@ -11,7 +11,7 @@ pipeline {
             steps {
                 sh 'ls -ltr'
                  // build the project and create a JAR file
-                sh 'cd CI-CD--project1-Jenkins-/spring-boot-app && mvn clean package'
+                sh 'cd spring-boot-app && mvn clean package'
             }
         }
      stage('Build and push docker image') {
