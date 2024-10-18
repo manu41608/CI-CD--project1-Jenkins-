@@ -10,7 +10,7 @@ pipeline {
         stage('check-out') {
             steps {
                 sh 'cloning git repo'
-                git branch: 'main', url: 'https://github.com/manu41608/jenkins-demo-1.git'
+                git branch: 'main', url: 'https://github.com/manu41608/CI-CD--project1-Jenkins-.git'
             }
         }
         stage('Build-Test') {
