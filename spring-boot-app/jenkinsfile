@@ -1,0 +1,41 @@
+
+pipeline {
+    agent {
+            docker {
+                image 'maven:3.9.3-eclipse-temurin-17'
+                args '-v $HOME/.m2:/root/.m2'
+            }
+        }
+    stages {
+        stage('check-out') {
+            steps {
+                sh 'cloning git repo'
+                git branch: 'main', url: 'https://github.com/manu41608/jenkins-demo-1.git'
+            }
+        }
+    }
+    stages {
+        stage('Build-Test') {
+            steps {
+                 // build the project and create a JAR file
+                sh ' cd ci-cd-project1(Jenkins)/spring-boot-app && mvn clean package'
+            }
+        }
+    }
+    stages {
+        stage('Build and push docker image') {
+        environment {
+          DOCKER_IMAGE = "manu41608/ci-cd-project1:${BUILD_NUMBER}"
+          // DOCKERFILE_LOCATION = "java-maven-sonar-argocd-helm-k8s/spring-boot-app/Dockerfile"
+          REGISTRY_CREDENTIALS = credentials('docker-cred')
+       }
+            steps {
+                
+               sh 'cd ci-cd-project1(jenkins)/spring-boot-app && docker build -t ${DOCKER_IMAGE} .'
+              def dockerImage = docker.image("${DOCKER_IMAGE}")
+              docker.withRegistry('https://hub.docker.com/repository/docker/manu41608/ci-cd-project1', "docker-cred") {
+                  dockerImage.push()
+            }
+        }
+    }
+}
