@@ -17,6 +17,5 @@ jobs:
       run: |
           cd spring-boot-app
           mvn clean package
-    - uses: actions/checkout@v4
     - name: Build the Docker image
       run: cd spring-boot-app && docker build . --tag my-image-name:$(date +%s)
