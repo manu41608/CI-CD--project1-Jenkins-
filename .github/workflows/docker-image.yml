@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Setup Java JDK
-      uses: actions/setup-java@v5.0.0
+    - name: Java Automatic Release
+      uses: fulminazzo/java-automatic-release@v4
           
     - name: Build and Package
       run: |
