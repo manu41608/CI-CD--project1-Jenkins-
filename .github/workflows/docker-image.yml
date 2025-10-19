@@ -11,10 +11,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    steps:
-    - name: Java Automatic Release
-      uses: fulminazzo/java-automatic-release@v4
-          
+    steps:    
     - name: Build and Package
       run: |
           cd spring-boot-app
