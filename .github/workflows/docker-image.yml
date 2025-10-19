@@ -12,11 +12,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Set up JDK 17
-    - uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
+    - name: Setup Java JDK
+      uses: actions/setup-java@v5.0.0
+          
     - name: Build and Package
       run: |
           cd spring-boot-app
