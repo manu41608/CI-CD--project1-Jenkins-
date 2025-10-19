@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: cd /CI-CD--project1-Jenkins-/spring-boot-app-file && docker build . --tag my-image-name:$(date +%s)
+      run: pwd
