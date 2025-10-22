@@ -15,15 +15,13 @@ pipeline {
             }
         }
      stage('Static Code Analysis') {
-      environment {
-        SONAR_URL = "http://98.89.35.250:9000"
-      }
       steps {
-        withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_AUTH_TOKEN')]) {
-          sh '''
-            cd spring-boot-app && mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL} -Dsonar.projectKey=my-java-app -Dsonar.projectName="My Java App"
+            withSonarQubeEnv(credentialsId: 'sonar') {
+             sh '''
+            cd spring-boot-app && mvn sonar:sonar -Dsonar.projectKey=bg -Dsonar.projectName=bg
             '''
-        }
+                  }
+       
       }
     }
      stage('Build and push docker image') {
