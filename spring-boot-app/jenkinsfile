@@ -1,65 +1,86 @@
 pipeline {
     agent any
+
+    environment {
+        SONAR_PROJECT_KEY = 'bg'
+        SONAR_PROJECT_NAME = 'bg'
+        SONAR_HOST_URL = 'http://98.89.35.250:9000'   // <-- replace with your reachable SonarQube URL
+        DOCKER_IMAGE = "manu41608/ci-cd-project1:${BUILD_NUMBER}"
+        REGISTRY_CREDENTIALS = credentials('docker-cred')
+        GIT_REPO_NAME = "CI-CD--project1-Jenkins-"
+        GIT_USER_NAME = "manu41608"
+    }
+
     stages {
-        stage('check-out') {
+        stage('Checkout') {
             steps {
-                echo 'cloning git repo'
+                echo 'Cloning Git repository...'
                 git branch: 'main', url: 'https://github.com/manu41608/CI-CD--project1-Jenkins-.git'
             }
         }
-        stage('Build-Test') {
+
+        stage('Build & Test') {
             steps {
-                sh 'ls -ltr'
-                 // build the project and create a JAR file
-                sh 'cd spring-boot-app && mvn clean package'
-            }
-        }
-     stage('Static Code Analysis') {
-      steps {
-            withSonarQubeEnv(credentialsId: 'sonar') {
-             sh '''
-            cd spring-boot-app && mvn sonar:sonar -Dsonar.projectKey=bg -Dsonar.projectName=bg
-            '''
-                  }
-       
-      }
-    }
-     stage('Build and push docker image') {
-        environment {
-          DOCKER_IMAGE = "manu41608/ci-cd-project1:${BUILD_NUMBER}"
-          // DOCKERFILE_LOCATION = "java-maven-sonar-argocd-helm-k8s/spring-boot-app/Dockerfile"
-          REGISTRY_CREDENTIALS = credentials('docker-cred')
-       }
-            steps {        
-               script {
-                    sh 'ls -ltr'
-                    sh 'cd spring-boot-app && docker build -t ${DOCKER_IMAGE} .'
-                    def dockerImage = docker.image("${DOCKER_IMAGE}")
-                    //docker.withRegistry('https://hub.docker.com/v2/', "docker-cred") {
-                     //   dockerImage.push()
-                   //}
-                    sh 'sudo docker push ${DOCKER_IMAGE}'
-              }
-         }
-       }
-    stage('Update Deployment File') {
-        environment {
-            GIT_REPO_NAME = "CI-CD--project1-Jenkins-"
-            GIT_USER_NAME = "manu41608"
-        }
-        steps {
-            withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                 sh '''
-                    git config user.email "manohara41608@gmail.com"
-                    git config user.name "manu41608"
-                    BUILD_NUMBER=${BUILD_NUMBER}
-                    sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" spring-boot-app-manifests/deployment.yml
-                    git add spring-boot-app-manifests/deployment.yml
-                    git commit -m "Update deployment image to version ${BUILD_NUMBER}"
-                    git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                cd spring-boot-app
+                mvn clean package -DskipTests
                 '''
             }
         }
+
+        stage('Static Code Analysis - SonarQube') {
+            steps {
+                withSonarQubeEnv('sonar') {
+                    sh '''
+                    cd spring-boot-app
+                    mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar \
+                        -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                        -Dsonar.projectName=${SONAR_PROJECT_NAME} \
+                        -Dsonar.host.url=${SONAR_HOST_URL} \
+                        -Dsonar.login=$SONAR_AUTH_TOKEN
+                    '''
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Build and Push Docker Image') {
+            steps {
+                script {
+                    sh '''
+                    cd spring-boot-app
+                    docker build -t ${DOCKER_IMAGE} .
+                    '''
+                    docker.withRegistry('', 'docker-cred') {
+                        def dockerImage = docker.image("${DOCKER_IMAGE}")
+                        dockerImage.push()
+                    }
+                }
+            }
+        }
+
+        stage('Update Deployment File') {
+            steps {
+                withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+                    sh '''
+                    git config user.email "manohara41608@gmail.com"
+                    git config user.name "manu41608"
+
+                    sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" spring-boot-app-manifests/deployment.yml
+
+                    git add spring-boot-app-manifests/deployment.yml
+                    git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+                    git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git HEAD:main
+                    '''
+                }
+            }
+        }
     }
-    }
- }
+}
