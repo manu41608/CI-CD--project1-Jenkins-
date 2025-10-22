@@ -5,8 +5,6 @@ pipeline {
         SONAR_PROJECT_KEY = 'bg'
         SONAR_PROJECT_NAME = 'bg'
         SONAR_HOST_URL = 'http://98.89.35.250:9000'   // <-- replace with your reachable SonarQube URL
-        DOCKER_IMAGE = "manu41608/ci-cd-project1:${BUILD_NUMBER}"
-        REGISTRY_CREDENTIALS = credentials('docker-cred')
         GIT_REPO_NAME = "CI-CD--project1-Jenkins-"
         GIT_USER_NAME = "manu41608"
     }
